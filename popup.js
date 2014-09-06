@@ -33,6 +33,7 @@ app.service('State', function() {
       chrome.extension.sendMessage({greeting: 'getState', domain: domain},
         function (response) {
           var state = response.state;
+          state.domain = domain;
           next(state);
         });
     });
@@ -41,7 +42,7 @@ app.service('State', function() {
   out.setState = function(state) {
     out.getDomain(function(domain) {
       chrome.extension.sendMessage({greeting: 'setState', domain: domain, state: state});
-    })
+    });
   };
 
   return out;
