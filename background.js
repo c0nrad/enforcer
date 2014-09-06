@@ -1,16 +1,21 @@
 'use strict';
 
 var chrome = chrome || {};
-var policy = "default-src 'none'; script-src 'self'; connect-src 'self'; img-src 'self'; style-src 'self'; font-src 'self'; report-uri http://localhost:3000/endpoint/ad82cb7bb6fbdc4fa58a78b8e4efdfb4348ad2d1d7305015b3f4901b9d8b5836"
-var enabled = true;
+var state = {};
+state.mode = 'Content-Security-Policy';
+state.domain = document.domain + "fuck";
+state.enabled = false;
+state.mode = 'Content-Security-Policy';
+state.policy = "default-src 'none'; script-src 'self'; connect-src 'self'; img-src 'self'; style-src 'self'; font-src 'self';";
+state.report = "http://caspr.io/endpoint/c2aaf0d6f6d93195b27365c1e14ef6cb2313c43c6890ecb0ef3de88672a82dd9";
 
 chrome.webRequest.onHeadersReceived.addListener(
   function(details) {
     var out = [];
-    console.log('using policy', policy);
+    console.log('using state', state);
 
-    if (enabled) {
-      out.push({name: 'Content-Security-Policy', value: policy});
+    if (state.enabled) {
+      out.push({name: 'Content-Security-Policy', value: state.policy});
     }
 
     for (var i = 0; i < details.responseHeaders.length; ++i) {
@@ -26,18 +31,13 @@ chrome.webRequest.onHeadersReceived.addListener(
 
 chrome.extension.onMessage.addListener( function(request,sender,sendResponse) {
     console.log('Request greeting', request.greeting);
-    if( request.greeting === 'getPolicy' ) {
-      sendResponse( {policy:policy} );
+
+    if (request.greeting === 'getState' ) {
+      sendResponse( {state: state } );
     }
-    if (request.greeting === 'getEnabled' ) {
-      sendResponse( {enabled: enabled } );
-    }
-    if (request.greeting === 'setPolicy' ) {
-      console.log('setting policy to', request.policy);
-      policy = request.policy;
-    }
-    if (request.greeting === 'setEnabled') {
-      console.log('enabled', request.enabled);
-      enabled = request.enabled;
+
+    if (request.greeting === 'setState') {
+      console.log('Updateing state', request.state);
+      state = request.state;
     }
 });

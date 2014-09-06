@@ -1,41 +1,58 @@
-<html>
-    <head>
-        <style>
-            body {
-                min-width: 420px;
-                overflow-x: hidden;
-                font-family: Arial, sans-serif;
-                font-size: 12px;
-            }
-            input, textarea {
-                width: 420px;
-            }
-            input#save {
-                font-weight: bold; width: auto;
-            }
-        </style>
-    </head>
-     <body ng-app="app" ng-csp ng-controller="MainController">
+<html st>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="c0nrad">
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css">
+    <style>
+     body, html {
+       width: 700px;
 
-        <form id="setPolicy">
-          <textarea ng-model="policy" id="policy"> </textarea>
-          <button ng-click="setPolicy()"> Set Policy </button>
+       /*Just lock it at min*/
+       height: 200px
+    }
+    </style>
 
-          <input type="checkbox" ng-model="enabled" ng-change="setEnabled()"> Enabled 
+  </head>
+  <body ng-app="app" ng-csp ng-controller="MainController">
+    <div class="container">
 
-          <p><label for="title">Title</label><br />
-          <input type="text" id="title" name="title" size="50" value="" /></p>
-          <p><label for="url">Url</label><br />
-          <input type="text" id="url" name="url" size="50" value="" /></p>
-          <p><label for="summary">Summary</label><br />
-          <textarea id="summary" name="summary" rows="6" cols="35"></textarea></p>
-          <p><label for="tags">Tags</label><br />
-          <input type="text" id="tags" name="tags" size="50" value="" /></p>
-          <p>
-              <input id="save" type="submit" value="Save Bookmark" />
-              <span id="status-display"></span>
-          </p>
-      </form>
+  	<div class="row">
+  		<div class="col-xs-4">
+        <img src="/img/happy.png" width="100%" style="padding: 7px">
+        <button class="btn btn-primary" ng-click="generateCaspr()"> Generate Caspr Endpoint </button>
+        <div style="padding-top: 5px">
+          <a href="endpoint"> View Results </a>
+        </div>
+
+      </div>
+      <div class="col-xs-8">
+        <h3> {{state.domain }} </h3>
+        <input type="checkbox" ng-model="state.enabled" ng-change="saveState()"> Enabled
+
+        <div class="form-group">
+          <label> Mode </label>
+          <select class="form-control" ng-change="saveState()" ng-model="state.mode" ng-options="a for a in ['Content-Security-Policy', 'Content-Security-Policy-Report-Only']">
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label> Policy </label>
+          <textarea ng-blur="saveState()" class="form-control" ng-model="state.policy" id="policy" style="width: 100%" rows="4"> </textarea>
+        </div>
+
+        <div class="form-group">
+          <label> Report-URI </label>
+          <input ng-blur="saveState()" type="text" class="form-control" ng-model="state.report">
+        </div>
+
+        <button class="btn btn-primary pull-right" style="margin-bottom:15px"> Save </button>
+
+      </div>
+    </div>
+
       <script src="/js/angular.min.js"> </script>
       <script src="popup.js"></script>
     </body>
