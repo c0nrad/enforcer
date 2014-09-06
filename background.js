@@ -1,43 +1,72 @@
 'use strict';
 
 var chrome = chrome || {};
-var state = {};
-state.mode = 'Content-Security-Policy';
-state.domain = document.domain + "fuck";
-state.enabled = false;
-state.mode = 'Content-Security-Policy';
-state.policy = "default-src 'none'; script-src 'self'; connect-src 'self'; img-src 'self'; style-src 'self'; font-src 'self';";
-state.report = "http://caspr.io/endpoint/c2aaf0d6f6d93195b27365c1e14ef6cb2313c43c6890ecb0ef3de88672a82dd9";
+
+var states = {};
+
+function defaultState() {
+  var state = {};
+  state.mode = 'Content-Security-Policy';
+  state.domain = document.domain;
+  state.enabled = false;
+  state.mode = 'Content-Security-Policy';
+  state.policy = "default-src 'none'; script-src 'self'; connect-src 'self'; img-src 'self'; style-src 'self'; font-src 'self';";
+  state.report = '';
+  return state;
+}
 
 chrome.webRequest.onHeadersReceived.addListener(
   function(details) {
     var out = [];
-    console.log('using state', state);
 
-    if (state.enabled) {
-      out.push({name: 'Content-Security-Policy', value: state.policy});
+    if (details.type !== 'main_frame') {
+      return;
     }
 
+    var matches = details.url.match(/^https?\:\/\/([^\/?#]+)(?:[\/?#]|$)/i);
+    var domain = matches && matches[1];
+
+    if (domain === null) {
+      return;
+    }
+
+    if (!(domain in states)) {
+      states[domain] = defaultState();
+    }
+
+    var state = states[domain];
+
+    var policyString = state.policy + '; report-uri ' + state.report;
+    //console.log('using state', state);
+    //console.log('policyStr', policyString);
+
+    if (state.enabled) {
+      out.push({name: state.mode, value: policyString});
+    }
+    //console.log(out);
+
     for (var i = 0; i < details.responseHeaders.length; ++i) {
-      if (details.responseHeaders[i].name === 'Content-Security-Policy') {
-        console.log('Previous Policy Found');
+      if (details.responseHeaders[i].name.toLowerCase() === 'content-security-policy' || details.responseHeaders[i].name.toLowerCase() === 'content-security-policy-report-only') {
+        //console.log('Previous Policy Found');
+        continue;
       }
       out.push(details.responseHeaders[i]);
-
     }
     return { responseHeaders: out };
   }, { urls: [ '<all_urls>']}, [ 'blocking', 'responseHeaders']);
 
 
 chrome.extension.onMessage.addListener( function(request,sender,sendResponse) {
-    console.log('Request greeting', request.greeting);
-
+    console.log('Request greeting', request.greeting, request.domain, request.state);
+    var domain = request.domain;
     if (request.greeting === 'getState' ) {
-      sendResponse( {state: state } );
+      if (!(domain in states)) {
+        states[domain] = defaultState();
+      }
+      sendResponse( {state: states[domain] } );
     }
 
     if (request.greeting === 'setState') {
-      console.log('Updateing state', request.state);
-      state = request.state;
+      states[domain] = request.state;
     }
 });
