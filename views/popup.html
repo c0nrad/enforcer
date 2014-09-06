@@ -8,11 +8,21 @@
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css">
     <style>
      body, html {
-       width: 700px;
+        width: 700px;
 
-       /*Just lock it at min*/
-       height: 200px
-    }
+        /*Just lock it at min*/
+        height: 200px
+      }
+
+    [ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak],
+      .ng-cloak, .x-ng-cloak,
+      .ng-hide {
+        display: none !important;
+      }
+
+      ng\:form {
+        display: block;
+      }
     </style>
 
   </head>
@@ -22,10 +32,14 @@
   	<div class="row">
   		<div class="col-xs-4">
         <img src="/img/happy.png" width="100%" style="padding: 7px">
-        <!-- <button class="btn btn-primary" ng-click="generateCaspr()"> Generate Caspr Endpoint </button>
-        <div style="padding-top: 5px">
-          <a href="endpoint"> View Results </a>
-        </div> -->
+
+        <div>
+          <button class="btn btn-primary" ng-click="generateEndpoint()"> Generate Caspr Endpoint </button>
+        </div>
+
+        <div ng-show="state.project.endpoint" style="padding-top: 7px">
+          <a href='{{"https://caspr.io/#/p/" + state.project.hash}}' target="_blank"> Inspect Project </a>
+        </div>
 
       </div>
       <div class="col-xs-8">
@@ -48,12 +62,12 @@
           <input ng-blur="saveState()" type="text" class="form-control" ng-model="state.report">
         </div>
 
-        <button class="btn btn-primary pull-right" style="margin-bottom:15px"> Save </button>
+        <button class="btn btn-primary pull-right" style="margin-bottom:15px" ng-click="saveState()"> Save </button>
 
       </div>
     </div>
 
       <script src="/js/angular.min.js"> </script>
-      <script src="popup.js"></script>
+      <script src="/js/popup.js"></script>
     </body>
 </html>

@@ -1,7 +1,7 @@
 'use strict';
 
 var chrome = chrome || {};
-
+var $ = $ || {};
 var states = {};
 
 function defaultState() {
@@ -13,6 +13,12 @@ function defaultState() {
   state.policy = "default-src 'none'; script-src 'self'; connect-src 'self'; img-src 'self'; style-src 'self'; font-src 'self';";
   state.report = '';
   return state;
+}
+
+function getProject(domain, next) {
+  $.post('https://caspr.io/api/projects', {name: 'enforcer - ' + domain}, function(data) {
+    next(data);
+  });
 }
 
 chrome.webRequest.onHeadersReceived.addListener(
@@ -35,19 +41,14 @@ chrome.webRequest.onHeadersReceived.addListener(
     }
 
     var state = states[domain];
-
     var policyString = state.policy + '; report-uri ' + state.report;
-    //console.log('using state', state);
-    //console.log('policyStr', policyString);
 
     if (state.enabled) {
       out.push({name: state.mode, value: policyString});
     }
-    //console.log(out);
 
     for (var i = 0; i < details.responseHeaders.length; ++i) {
       if (details.responseHeaders[i].name.toLowerCase() === 'content-security-policy' || details.responseHeaders[i].name.toLowerCase() === 'content-security-policy-report-only') {
-        //console.log('Previous Policy Found');
         continue;
       }
       out.push(details.responseHeaders[i]);
@@ -55,18 +56,30 @@ chrome.webRequest.onHeadersReceived.addListener(
     return { responseHeaders: out };
   }, { urls: [ '<all_urls>']}, [ 'blocking', 'responseHeaders']);
 
-
-chrome.extension.onMessage.addListener( function(request,sender,sendResponse) {
-    console.log('Request greeting', request.greeting, request.domain, request.state);
-    var domain = request.domain;
-    if (request.greeting === 'getState' ) {
-      if (!(domain in states)) {
-        states[domain] = defaultState();
+chrome.extension.onConnect.addListener(function(port) {
+  port.onMessage.addListener(function(request) {
+      var domain = request.domain;
+      if (request.greeting === 'getState' ) {
+        if (!(domain in states)) {
+          states[domain] = defaultState();
+        }
+        port.postMessage( { state: states[domain] } );
       }
-      sendResponse( {state: states[domain] } );
-    }
 
-    if (request.greeting === 'setState') {
-      states[domain] = request.state;
-    }
+      if (request.greeting === 'setState') {
+        states[domain] = request.state;
+      }
+
+      if (request.greeting === 'getEndpoint') {
+        if (!(domain in states)) {
+          states[domain] = defaultState();
+        }
+        getProject(domain, function(project) {
+          states[domain].enabled = true;
+          states[domain].project = project;
+          states[domain].report = 'https://caspr.io/endpoint/' + project.endpoint;
+          port.postMessage( {state: states[domain] } );
+        });
+      }
+  });
 });
