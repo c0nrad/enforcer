@@ -23,6 +23,8 @@ function getProject(domain, next) {
 
 chrome.webRequest.onHeadersReceived.addListener(
   function(details) {
+
+
     var out = [];
 
     if (details.type !== 'main_frame') {
@@ -43,12 +45,15 @@ chrome.webRequest.onHeadersReceived.addListener(
     var state = states[domain];
     var policyString = state.policy + '; report-uri ' + state.report;
 
-    if (state.enabled) {
-      out.push({name: state.mode, value: policyString});
+    if (!state.enabled) {
+      return { responseHeaders: details.responseHeaders };
     }
+
+    out.push({name: state.mode, value: policyString});
 
     for (var i = 0; i < details.responseHeaders.length; ++i) {
       if (details.responseHeaders[i].name.toLowerCase() === 'content-security-policy' || details.responseHeaders[i].name.toLowerCase() === 'content-security-policy-report-only') {
+        // ignore previous content-security-policy
         continue;
       }
       out.push(details.responseHeaders[i]);
