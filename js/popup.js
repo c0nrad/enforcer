@@ -3,16 +3,37 @@
 var chrome = chrome || {};
 var app = angular.module('app', []);
 
+
 app.controller('MainController', function($scope, $rootScope, State) {
   $scope.state = {};
+  $scope.directives = ['default-src', 'script-src', 'object-src', 'img-src', 'media-src', 'child-src', 'frame-ancestors', 'font-src', 'form-action', 'connect-src', 'style-src', 'report-uri'];
+  $scope.policy = new Policy();
 
   $rootScope.$on('state', function(event, state) {
     $scope.$apply(function() {
       $scope.state = state;
+      $scope.policy = new Policy(state.policy);
     });
   });
 
+  $scope.updateDirective = function(directive, value) {
+    $scope.policy.set(directive, value);
+  };
+
+  // the policy.raw changes, update the child directives
+  $scope.updateDirectives = function() {
+    $scope.policy = new Policy($scope.policy.raw);
+    $scope.saveState();
+  };
+
+  // the polocy.directives changed, update the raw
+  $scope.updatePolicy = function() {
+    $scope.policy.raw = $scope.policy.string();
+    $scope.saveState();
+  };
+
   $scope.saveState = function() {
+    $scope.state.policy = $scope.policy.toString();
     State.setState($scope.state);
   };
 

@@ -34,7 +34,7 @@
         <img src="/img/happy.png" width="100%" style="padding: 7px">
 
         <div>
-          <button class="btn btn-primary" ng-click="generateEndpoint()"> Generate Caspr Endpoint </button>
+          <button class="btn btn-primary" ng-click="generateEndpoint()"> Generate Caspr Endpoints </button>
         </div>
 
         <div ng-show="state.project.endpoint" style="padding-top: 7px">
@@ -53,20 +53,28 @@
         </div>
 
         <div class="form-group">
-          <label> Policy </label>
-          <textarea ng-blur="saveState()" class="form-control" ng-model="state.policy" id="policy" style="width: 100%" rows="4"> </textarea>
-        </div>
-
-        <div class="form-group">
           <label> Report-URI </label>
           <input ng-blur="saveState()" type="text" class="form-control" ng-model="state.report">
         </div>
+        
 
-        <button class="btn btn-primary pull-right" style="margin-bottom:15px" ng-click="saveState()"> Save </button>
+        <div class="form-group">
+          <label> Policy </label>
+
+          <textarea ng-change="updateDirectives()" class="form-control" ng-model="policy.raw" id="policy" style="width: 100%" rows="4"> </textarea>
+
+          <table class="table">
+            <tr ng-repeat="directive in directives">
+              <td>{{directive}}</td>
+              <td><input ng-change="updatePolicy()" class="form-control" style="width: 100%" ng-model="policy.directives[directive]"></td>
+            </tr>
+          </table>
+        </div>
 
       </div>
     </div>
 
+      <script src="/js/policy.js"></script>
       <script src="/js/angular.min.js"> </script>
       <script src="/js/popup.js"></script>
     </body>
