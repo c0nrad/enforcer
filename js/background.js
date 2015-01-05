@@ -6,7 +6,6 @@ var states = {};
 
 function defaultState() {
   var state = {};
-  state.mode = 'Content-Security-Policy';
   state.domain = document.domain;
   state.enabled = false;
   state.mode = 'Content-Security-Policy';
@@ -23,7 +22,6 @@ function getProject(domain, next) {
 
 chrome.webRequest.onHeadersReceived.addListener(
   function(details) {
-
 
     var out = [];
 
