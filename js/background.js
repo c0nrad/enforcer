@@ -10,7 +10,6 @@ function defaultState() {
   state.enabled = false;
   state.mode = 'Content-Security-Policy';
   state.policy = "default-src 'none'; script-src 'self'; connect-src 'self'; img-src 'self'; style-src 'self'; font-src 'self';";
-  state.report = '';
   return state;
 }
 
@@ -41,7 +40,7 @@ chrome.webRequest.onHeadersReceived.addListener(
     }
 
     var state = states[domain];
-    var policyString = state.policy + '; report-uri ' + state.report;
+    var policyString = state.policy
 
     if (!state.enabled) {
       return { responseHeaders: details.responseHeaders };

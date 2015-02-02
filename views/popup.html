@@ -33,9 +33,6 @@
   		<div class="col-xs-4">
         <img src="/img/happy.png" width="100%" style="padding: 7px">
 
-        <div>
-          <button class="btn btn-primary" ng-click="generateEndpoint()"> Generate Caspr Endpoints </button>
-        </div>
 
         <div ng-show="state.project.endpoint" style="padding-top: 7px">
           <a href='{{"https://caspr.io/#/p/" + state.project.hash}}' target="_blank"> Inspect Project </a>
@@ -51,12 +48,6 @@
           <select class="form-control" ng-change="saveState()" ng-model="state.mode" ng-options="a for a in ['Content-Security-Policy', 'Content-Security-Policy-Report-Only']">
           </select>
         </div>
-
-        <div class="form-group">
-          <label> Report-URI </label>
-          <input ng-blur="saveState()" type="text" class="form-control" ng-model="state.report">
-        </div>
-        
 
         <div class="form-group">
           <label> Policy </label>
